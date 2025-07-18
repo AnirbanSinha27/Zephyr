@@ -1,18 +1,23 @@
 'use client';
 
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import Link from 'next/link';
 import { AiOutlineMinus, AiOutlinePlus, AiOutlineLeft, AiOutlineShopping } from 'react-icons/ai';
 import { TiDeleteOutline } from 'react-icons/ti';
 import { useStateContext } from '../context/StateContext';
 import toast from 'react-hot-toast';
 import { urlFor } from '../lib/client';
+import UserDetailsModal from './UserDetailsModal';
 
 const Cart = () => {
   const cartRef = useRef();
   const { setShowCart, cartItems, totalPrice, totalQuantities, toggleCartItemQuantity, onRemove } = useStateContext();
 
-  const handleRazorpayPayment = async () => {
+  // Modal state
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Modified payment handler to accept user data
+  const handleRazorpayPayment = async (userData) => {
     const res = await fetch('/api/razorpay', {
       method: 'POST',
       headers: {
@@ -31,13 +36,22 @@ const Cart = () => {
       description: 'Test Transaction',
       order_id: data.id,
       handler: function (response) {
+        // Save order details to localStorage
+        localStorage.setItem('orderDetails', JSON.stringify({
+          user: userData,
+          cart: cartItems,
+          total: totalPrice
+        }));
         // Redirect to success page after successful payment
         window.location.href = '/success';
       },
       prefill: {
-        name: 'Zephyr Stores',
-        email: 'orders@zephyr.com',
-        contact: '9999999999'
+        name: userData?.name || 'Zephyr Stores',
+        email: userData?.email || 'orders@zephyr.com',
+        contact: userData?.mobile || '9999999999'
+      },
+      notes: {
+        age: userData?.age || ''
       },
       theme: {
         color: '#00000'
@@ -51,7 +65,14 @@ const Cart = () => {
       toast.error('Razorpay is not loaded');
     }
   };
-  
+
+  // Modal handlers
+  const handleOpenModal = () => setIsModalOpen(true);
+  const handleCloseModal = () => setIsModalOpen(false);
+  const handleUserDetailsSubmit = (details) => {
+    setIsModalOpen(false);
+    handleRazorpayPayment(details);
+  };
 
   return (
     <div className="cart-wrapper" ref={cartRef}>
@@ -124,12 +145,17 @@ const Cart = () => {
           <div className='cart-bottom'>
             <div className='btn-container'>
               <button
-                className='btn' type='button' onClick={handleRazorpayPayment}>
+                className='btn' type='button' onClick={handleOpenModal}>
                 Pay with Razorpay
               </button>
             </div>
           </div>
         )}
+        <UserDetailsModal
+          isOpen={isModalOpen}
+          onClose={handleCloseModal}
+          onSubmit={handleUserDetailsSubmit}
+        />
       </div>
     </div>
   )
