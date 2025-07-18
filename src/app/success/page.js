@@ -127,7 +127,7 @@ const Success = () => {
             <div>
               <h3 className="email-notification-title">Confirmation Email Sent</h3>
               <p className="email-notification-text">
-                We've sent a detailed receipt to your email address. Please check your inbox and spam folder.
+              We&apos;ve sent a detailed receipt to your email address. Please check your inbox and spam folder.
               </p>
               <p className="email-notification-contact">
                 Need help? Contact us at{" "}
@@ -158,7 +158,7 @@ const Success = () => {
         {/* Additional Info */}
         <div className="additional-info-box">
           <p className="info-label">
-            Your order is being processed and you'll receive tracking information soon.
+          Your order is being processed and you&apos;ll receive tracking information soon.
           </p>
         </div>
       </div>
